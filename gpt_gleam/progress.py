@@ -6,13 +6,10 @@ from gpt_gleam.costs import CompletionUsageEstimator
 
 class ChatCompletionProgress(tqdm):
     def __init__(self, total: int, seen: int, *args, **kwargs):
-        super().__init__(total=total, *args, **kwargs)
+        super().__init__(total=total, initial=seen, *args, **kwargs)
         self.chat_usage = CompletionUsageEstimator()
-        self._total_chat = total
-        self._seen_chat = seen
 
     def __enter__(self):
-        super().update(self._total_chat - self._seen_chat)
         return super().__enter__()
 
     def update(self, completion: ChatCompletion) -> bool | None:
