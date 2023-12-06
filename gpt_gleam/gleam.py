@@ -34,7 +34,9 @@ def main(
 
     if total is None:
         print("Counting total number of examples (requires iteration)...")
-        total = len(iterate_post_frame_labeled_pairs(data_path, frame_path, skip_stances=[Stance.NotRelevant]))
+        total = sum(
+            1 for _ in iterate_post_frame_labeled_pairs(data_path, frame_path, skip_stances=[Stance.NotRelevant])
+        )
         print(f"Total predictions: {total:,}")
 
     with JsonlPredictionsWriter(output_path) as preds, ChatCompletionProgress(
