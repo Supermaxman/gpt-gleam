@@ -12,7 +12,7 @@ class ChatCompletionProgress(tqdm):
         self._seen_chat = seen
 
     def __enter__(self):
-        self.update(self._total_chat - self._seen_chat)
+        super().update(self._total_chat - self._seen_chat)
         return super().__enter__()
 
     def update(self, completion: ChatCompletion) -> bool | None:
