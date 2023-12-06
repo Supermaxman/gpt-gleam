@@ -35,7 +35,7 @@ def main(
     if total is None:
         print("Counting total number of examples (requires iteration)...")
         total = sum(
-            1 for _ in iterate_post_frame_labeled_pairs(data_path, frame_path, skip_stances=[Stance.NotRelevant])
+            1 for _ in iterate_post_frame_labeled_pairs(data_path, frame_path, skip_stances=[Stance.Not_Relevant])
         )
         print(f"Total predictions: {total:,}")
 
@@ -43,7 +43,7 @@ def main(
         total=total, seen=len(preds), disable=debug
     ) as bar:
         for post, frame, stance in iterate_post_frame_labeled_pairs(
-            data_path, frame_path, skip_stances=[Stance.NotRelevant]
+            data_path, frame_path, skip_stances=[Stance.Not_Relevant]
         ):
             ex_id = f"{post.id}-{frame.id}"
             if ex_id in preds:

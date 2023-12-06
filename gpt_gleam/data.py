@@ -203,8 +203,8 @@ def encode_image_url(image_path):
 class Stance(str, Enum):
     Accept = "Accept"
     Reject = "Reject"
-    NoStance = "No Stance"
-    NotRelevant = "Not Relevant"
+    No_Stance = "No Stance"
+    Not_Relevant = "Not Relevant"
 
 
 @dataclasses.dataclass
@@ -277,7 +277,7 @@ def iterate_posts(
             image_url = encode_image_url(image_path)
             result["image_url"] = image_url
         if "labels" in ex:
-            result["labels"] = {f_id: Stance[stance] for f_id, stance in ex["labels"].items()}
+            result["labels"] = {f_id: Stance[stance.replace(" ", "_")] for f_id, stance in ex["labels"].items()}
         if "demonstrations" in ex:
             demonstrations = ex["demonstrations"]
             result["demonstrations"] = demonstrations
