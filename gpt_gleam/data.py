@@ -23,8 +23,8 @@ transl_table = dict([(ord(x), ord(y)) for x, y in zip("‘’´“”–-", "'''
 @dataclasses.dataclass
 class TweetPreprocessConfig:
     do_lower_case: bool = True
-    url_filler: str = "twitterurl"
-    username_filler: str = "twitteruser"
+    url_filler: str = "[URL]"
+    username_filler: str = "[USER]"
     replace_usernames: bool = True
     replace_urls: bool = True
     asciify_emojis: bool = True
