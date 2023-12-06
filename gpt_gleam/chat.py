@@ -88,7 +88,7 @@ class ChatContextCreator:
         return content
 
     def create_prompt(self, post: Post, frame: Frame, stance: Stance):
-        content = self.build_content(post, frame, stance)
+        content = self.build_prompt(post, frame, stance)
         if post.image_url is None:
             return self.create_text_prompt(content)
         else:
