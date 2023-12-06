@@ -220,7 +220,7 @@ class Post:
 class Frame:
     id: str
     text: str
-    problems: list[str]
+    problems: Optional[list[str]]
 
 
 def load_frames(frame_path: str, preprocess_config: Optional[TweetPreprocessConfig] = None) -> dict[str, Frame]:
@@ -242,7 +242,9 @@ def load_frames(frame_path: str, preprocess_config: Optional[TweetPreprocessConf
     frame_objs = {}
     for f_id, frame in frames.items():
         frame["text"] = preprocess_tweet(frame["text"], preprocess_config)
-        frame_objs[f_id] = Frame(id=f_id, text=frame["text"], problems=frame["problems"])
+        frame_objs[f_id] = Frame(
+            id=f_id, text=frame["text"], problems=frame["problems"] if "problems" in frame else None
+        )
 
     return frame_objs
 
