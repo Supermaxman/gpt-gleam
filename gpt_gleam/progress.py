@@ -8,6 +8,7 @@ class ChatCompletionProgress(tqdm):
     def __init__(self, total: int, seen: int, *args, **kwargs):
         super().__init__(total=total, initial=seen, *args, **kwargs)
         self.chat_usage = CompletionUsageEstimator()
+        self.chat_usage.init(total - seen)
 
     def __enter__(self):
         return super().__enter__()
