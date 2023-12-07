@@ -15,5 +15,4 @@ python gpt_gleam/unlabeled.py \
   --config configs/cfact/cfact-gpt4v.yaml \
   --data_path /shared/aifiles/disk1/media/twitter/v10/data/test.jsonl \
   --frame_path /shared/hltdir4/disk1/team/data/corpora/co-vax-frames/covid19/frames.json \
-  --debug \
   --output_path /shared/aifiles/disk1/media/artifacts/cfact/co-vax-frames/cfact-gpt4v.jsonl
