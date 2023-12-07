@@ -1,8 +1,5 @@
 import argparse
 from collections import defaultdict
-import os
-from typing import Optional
-
 
 from gpt_gleam.data import Stance, iterate_post_frame_labeled_pairs, read_jsonl
 from gpt_gleam.results import TabularResultsWriter

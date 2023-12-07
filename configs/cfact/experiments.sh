@@ -34,10 +34,12 @@ python gpt_gleam/verify.py \
 
 python gpt_gleam/eval.py \
     --data_path /shared/hltdir4/disk1/team/data/corpora/co-vax-frames/covid19/co-vax-frames-test.jsonl \
+    --frame_path /shared/hltdir4/disk1/team/data/corpora/co-vax-frames/covid19/frames.json \
     --pred_path /shared/aifiles/disk1/media/artifacts/cfact/co-vax-frames/verify-gpt4-test.jsonl \
     --output_path /shared/aifiles/disk1/media/artifacts/cfact/co-vax-frames/results-gpt4-test.txt
 
 python gpt_gleam/eval.py \
     --data_path /shared/aifiles/disk1/media/twitter/v10/data/test.jsonl \
+    --frame_path /shared/hltdir4/disk1/team/data/corpora/co-vax-frames/covid19/frames.json \
     --pred_path /shared/aifiles/disk1/media/artifacts/cfact/co-vax-frames/verify-gpt4v-test.jsonl \
     --output_path /shared/aifiles/disk1/media/artifacts/cfact/co-vax-frames/results-gpt4v-test.txt
