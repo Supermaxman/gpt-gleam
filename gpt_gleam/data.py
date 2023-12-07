@@ -286,9 +286,9 @@ def iterate_posts(
             stance = Stance[stance.replace(" ", "_")]
             cfacts[post_id][f_id].append(StanceCounterFactual(stance=stance, rationale=content))
 
-        for post_id, f_cfacts in cfacts.items():
-            for f_id, cfacts in f_cfacts.items():
-                cfacts.sort(key=lambda x: STANCE_ORDER.index(x.stance))
+        for post_id, pf_cfacts in cfacts.items():
+            for f_id, f_cfacts in pf_cfacts.items():
+                f_cfacts.sort(key=lambda x: STANCE_ORDER.index(x.stance))
 
     for ex in read_jsonl(data_path):
         ex_id = ex["id"]
