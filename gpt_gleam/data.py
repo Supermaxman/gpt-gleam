@@ -249,9 +249,7 @@ def load_frames(frame_path: str, preprocess_config: Optional[TweetPreprocessConf
     return frame_objs
 
 
-def iterate_posts(
-    data_path: str, preprocess_config: Optional[TweetPreprocessConfig] = None, images=False
-) -> Iterator[Post]:
+def iterate_posts(data_path: str, preprocess_config: Optional[TweetPreprocessConfig] = None) -> Iterator[Post]:
     if preprocess_config is None:
         preprocess_config = TweetPreprocessConfig(
             do_lower_case=False,
@@ -270,7 +268,7 @@ def iterate_posts(
         ex_text = ex_text.strip().replace("\r", " ").replace("\n", " ")
         ex_text = preprocess_tweet(ex_text, preprocess_config)
         result = {"id": ex_id, "text": ex_text}
-        if images:
+        if "images" in ex:
             image_relative_path = ex["images"][0]
             data_folder = os.path.dirname(data_path)
             image_path = os.path.join(data_folder, image_relative_path)
