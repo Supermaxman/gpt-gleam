@@ -45,7 +45,7 @@ def main(
         for post, frame, stance in iterate_post_frame_unlabeled_pairs(
             data_path, frame_path, skip_stances=[Stance.Not_Relevant]
         ):
-            ex_id = f"{post.id}-{frame.id}"
+            ex_id = f"{post.id}-{frame.id}-{stance.value}"
             if ex_id in preds:
                 continue
             messages = creator.create_context(post, frame, stance)
@@ -63,7 +63,7 @@ def main(
                 print(f"Skipping example due to API safety error: {post.id}, {frame.id}")
                 continue
             content = completion.choices[0].message.content
-            preds.add({"id": ex_id, "post_id": post.id, "f_id": frame.id, "content": content})
+            preds.add({"id": ex_id, "post_id": post.id, "f_id": frame.id, "stance": stance.value, "content": content})
             messages.append({"role": "assistant", "content": content})
             if debug:
                 print_messages(messages)
