@@ -18,7 +18,6 @@ def main(
     data_path: str,
     frame_path: str,
     output_path: str,
-    demo_path: Optional[str] = None,
     total: Optional[int] = None,
     debug: bool = False,
 ):
@@ -27,10 +26,6 @@ def main(
         api_key=os.getenv("OPENAI_API_KEY"),
         timeout=os.getenv("OPENAI_TIMEOUT", 90),
     )
-
-    # demos: list[tuple[Post, Frame, Stance]] = []
-    # if demo_path is not None:
-    #     demos = list(iterate_post_frame_labeled_pairs(demo_path, frame_path, skip_stances=[Stance.NotRelevant]))
 
     if total is None:
         print("Counting total number of examples (requires iteration)...")
@@ -74,7 +69,6 @@ if __name__ == "__main__":
     parser = argparse.ArgumentParser()
     parser.add_argument("--config", type=str, required=True, help="path to config file")
     parser.add_argument("--data_path", type=str, required=True, help="path to data jsonl file")
-    parser.add_argument("--demo_path", type=str, help="path to demo jsonl file")
     parser.add_argument("--frame_path", type=str, required=True, help="path to frames json file")
     parser.add_argument("--output_path", type=str, required=True, help="path to output jsonl file")
     parser.add_argument("--total", type=int, help="total number of examples to process")
@@ -88,7 +82,6 @@ if __name__ == "__main__":
     main(
         config=config,
         data_path=args.data_path,
-        demo_path=args.demo_path,
         frame_path=args.frame_path,
         output_path=args.output_path,
         total=args.total,

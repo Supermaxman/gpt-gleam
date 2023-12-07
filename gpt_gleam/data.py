@@ -1,3 +1,4 @@
+from collections import defaultdict
 import dataclasses
 import html
 import os
@@ -207,13 +208,7 @@ class Stance(str, Enum):
     Not_Relevant = "Not Relevant"
 
 
-@dataclasses.dataclass
-class Post:
-    id: str
-    text: str
-    image_url: Optional[str] = None
-    labels: Optional[dict[str, Stance]] = None
-    demonstrations: Optional[dict[str, str]] = None
+STANCE_ORDER = [Stance.Accept, Stance.Reject, Stance.No_Stance, Stance.Not_Relevant]
 
 
 @dataclasses.dataclass
@@ -221,6 +216,22 @@ class Frame:
     id: str
     text: str
     problems: Optional[list[str]]
+
+
+@dataclasses.dataclass
+class StanceCounterFactual:
+    stance: Stance
+    rationale: str
+
+
+@dataclasses.dataclass
+class Post:
+    id: str
+    text: str
+    image_url: Optional[str] = None
+    labels: Optional[dict[str, Stance]] = None
+    demonstrations: Optional[dict[str, str]] = None
+    cfacts: Optional[dict[str, list[StanceCounterFactual]]] = None
 
 
 def load_frames(frame_path: str, preprocess_config: Optional[TweetPreprocessConfig] = None) -> dict[str, Frame]:
@@ -249,7 +260,9 @@ def load_frames(frame_path: str, preprocess_config: Optional[TweetPreprocessConf
     return frame_objs
 
 
-def iterate_posts(data_path: str, preprocess_config: Optional[TweetPreprocessConfig] = None) -> Iterator[Post]:
+def iterate_posts(
+    data_path: str, preprocess_config: Optional[TweetPreprocessConfig] = None, cfact_path: Optional[str] = None
+) -> Iterator[Post]:
     if preprocess_config is None:
         preprocess_config = TweetPreprocessConfig(
             do_lower_case=False,
@@ -262,6 +275,21 @@ def iterate_posts(data_path: str, preprocess_config: Optional[TweetPreprocessCon
             remove_unicode_symbols=False,
             remove_accented_characters=False,
         )
+
+    cfacts = defaultdict(lambda: defaultdict(list))
+    if cfact_path is not None:
+        for cf in read_jsonl(cfact_path):
+            post_id = cf["post_id"]
+            f_id = cf["f_id"]
+            stance = cf["stance"]
+            content = cf["content"]
+            stance = Stance[stance.replace(" ", "_")]
+            cfacts[post_id][f_id].append(StanceCounterFactual(stance=stance, rationale=content))
+
+        for post_id, f_cfacts in cfacts.items():
+            for f_id, cfacts in f_cfacts.items():
+                cfacts.sort(key=lambda x: STANCE_ORDER.index(x.stance))
+
     for ex in read_jsonl(data_path):
         ex_id = ex["id"]
         ex_text = ex["text"]
@@ -279,6 +307,10 @@ def iterate_posts(data_path: str, preprocess_config: Optional[TweetPreprocessCon
         if "demonstrations" in ex:
             demonstrations = ex["demonstrations"]
             result["demonstrations"] = demonstrations
+        if ex_id in cfacts:
+            # f_id -> list[CounterFactual]
+            ex_cfacts = cfacts[ex_id]
+            result["cfacts"] = ex_cfacts
         result = Post(**result)
         yield result
 
@@ -288,6 +320,7 @@ def iterate_post_frame_labeled_pairs(
     frame_path: str,
     preprocess_config: Optional[TweetPreprocessConfig] = None,
     skip_stances: Optional[list[Stance]] = None,
+    cfact_path: Optional[str] = None,
 ):
     if preprocess_config is None:
         preprocess_config = TweetPreprocessConfig(
@@ -304,7 +337,7 @@ def iterate_post_frame_labeled_pairs(
     if skip_stances is None:
         skip_stances = []
     frames = load_frames(frame_path, preprocess_config)
-    for post in iterate_posts(data_path, preprocess_config):
+    for post in iterate_posts(data_path, preprocess_config, cfact_path):
         if post.labels is None:
             continue
         for f_id, stance in post.labels.items():

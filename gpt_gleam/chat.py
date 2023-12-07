@@ -1,5 +1,5 @@
-from abc import ABC, abstractmethod
 import time
+from typing import Optional
 from gpt_gleam.configuration import ChatCompletionConfig
 from gpt_gleam.data import Frame, Post, Stance
 
@@ -80,35 +80,25 @@ class ChatContextCreator:
         ]
         return messages
 
-    def build_prompt(self, post: Post, frame: Frame, stance: Stance) -> str:
-        content = self.user_prompt.format(
-            post=post.text,
-            frame=frame.text,
-            stance=stance.value,
-        )
+    def build_prompt(self, post: Post, frame: Frame, stance: Optional[Stance] = None, **kwargs) -> str:
+        values = {
+            "post": post.text,
+            "frame": frame.text,
+        }
+        if stance is not None:
+            values["stance"] = stance.value
+        values = {**values, **kwargs}
+        content = self.user_prompt.format(**values)
         return content
 
-    def create_prompt(self, post: Post, frame: Frame, stance: Stance):
-        content = self.build_prompt(post, frame, stance)
+    def create_prompt(self, post: Post, frame: Frame, stance: Optional[Stance] = None, **kwargs):
+        content = self.build_prompt(post, frame, stance, **kwargs)
         if post.image_url is None:
             return self.create_text_prompt(content)
         else:
             return self.create_image_prompt(content, post.image_url)
 
-    # def create_demo(self, ex: Post):
-    #     if ex.demonstrations is None:
-    #         raise ValueError(f"Example {ex.id} has no demonstrations")
-    #     messages = []
-    #     for f_id, reason in ex.demonstrations.items():
-    #         frame = self.frames[f_id]
-    #         messages.append(self.create_prompt(ex, frame))
-    #         messages.append({"role": "assistant", "content": reason})
-    #     return messages
-
-    def create_context(self, post: Post, frame: Frame, stance: Stance):
+    def create_context(self, post: Post, frame: Frame, stance: Optional[Stance] = None, **kwargs):
         messages = self.build_context()
-        # demos = self.find_demos(*args, **kwargs)
-        # for demo in demos:
-        #     messages.extend(self.create_demo(demo))
-        messages.append(self.create_prompt(post, frame, stance))
+        messages.append(self.create_prompt(post, frame, stance, **kwargs))
         return messages

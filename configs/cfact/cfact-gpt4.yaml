@@ -6,7 +6,7 @@ max_tokens: 1024
 temperature: 1.0
 top_p: 0.7
 system_prompt: >-
-  You are a helpful linguistic assistant.
+  You are an expert linguistic assistant.
   Frames of communication select particular aspects of an issue and make them salient in communicating a message.
   Frames of communication are ubiquitous in social media discourse and can impact how people understand issues and, more importantly, how they form their opinions.
   You will be tasked with explaining why a tweet may have a stance towards a provided vaccine hesitancy frame.
