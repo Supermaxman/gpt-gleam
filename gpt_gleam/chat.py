@@ -41,11 +41,12 @@ def chat(client: OpenAI, delay: float | int, **kwargs) -> ChatCompletion | None:
 def print_messages(messages):
     for message in messages:
         if isinstance(message["content"], list):
+            print(f"{message['role']}:")
             for content in message["content"]:
                 if content["type"] == "text":
-                    print(f"{message['role']}: {content['text']}")
+                    print(content["text"])
                 elif content["type"] == "image_url":
-                    print(f"{message['role']}: [IMAGE]")
+                    print("[IMAGE]")
         else:
             print(f"{message['role']}: {message['content']}")
         print()
