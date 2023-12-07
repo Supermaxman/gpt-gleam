@@ -287,7 +287,6 @@ def iterate_post_frame_labeled_pairs(
     data_path: str,
     frame_path: str,
     preprocess_config: Optional[TweetPreprocessConfig] = None,
-    images=False,
     skip_stances: Optional[list[Stance]] = None,
 ):
     if preprocess_config is None:
@@ -305,7 +304,7 @@ def iterate_post_frame_labeled_pairs(
     if skip_stances is None:
         skip_stances = []
     frames = load_frames(frame_path, preprocess_config)
-    for post in iterate_posts(data_path, preprocess_config, images):
+    for post in iterate_posts(data_path, preprocess_config):
         if post.labels is None:
             continue
         for f_id, stance in post.labels.items():
@@ -319,7 +318,6 @@ def iterate_post_frame_unlabeled_pairs(
     data_path: str,
     frame_path: str,
     preprocess_config: Optional[TweetPreprocessConfig] = None,
-    images=False,
     skip_stances: Optional[list[Stance]] = None,
 ):
     if preprocess_config is None:
@@ -337,7 +335,7 @@ def iterate_post_frame_unlabeled_pairs(
     if skip_stances is None:
         skip_stances = []
     frames = load_frames(frame_path, preprocess_config)
-    for post in iterate_posts(data_path, preprocess_config, images):
+    for post in iterate_posts(data_path, preprocess_config):
         if post.labels is None:
             continue
         for f_id, f_stance in post.labels.items():
