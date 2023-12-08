@@ -10,6 +10,7 @@ def main(
     pred_path: str,
     frame_path: str,
     output_path: str,
+    full_text: bool = False,
     debug: bool = False,
 ):
     with TabularResultsWriter(output_path) as writer:
@@ -25,7 +26,9 @@ def main(
                 pred = Stance.No_Stance.value.lower()
                 # TODO track missing predictions
             else:
-                pred = preds[(post.id, frame.id)].lower().strip().split("\n")[-1]
+                pred = preds[(post.id, frame.id)].lower().strip()
+                if not full_text:
+                    pred = pred.split("\n")[-1]
 
             if stance == Stance.No_Stance:
                 # actual negative
@@ -83,6 +86,7 @@ if __name__ == "__main__":
     parser.add_argument("--pred_path", type=str, help="path to prediction jsonl file")
     parser.add_argument("--output_path", type=str, required=True, help="path to output jsonl file")
     parser.add_argument("--debug", action="store_true", help="debug mode")
+    parser.add_argument("--full_text", action="store_true", help="use full text instead of rationale")
     args = parser.parse_args()
 
     main(
@@ -90,5 +94,6 @@ if __name__ == "__main__":
         frame_path=args.frame_path,
         pred_path=args.pred_path,
         output_path=args.output_path,
+        full_text=args.full_text,
         debug=args.debug,
     )

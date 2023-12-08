@@ -111,6 +111,12 @@ python gpt_gleam/labeled.py \
   --frame_path /shared/hltdir4/disk1/team/data/corpora/co-vax-frames/covid19/frames.json \
   --output_path /shared/aifiles/disk1/media/artifacts/cfact/co-vax-frames/direct-gpt4.jsonl
 
+python gpt_gleam/eval.py \
+    --data_path /shared/hltdir4/disk1/team/data/corpora/co-vax-frames/covid19/co-vax-frames-test.jsonl \
+    --frame_path /shared/hltdir4/disk1/team/data/corpora/co-vax-frames/covid19/frames.json \
+    --pred_path /shared/aifiles/disk1/media/artifacts/cfact/co-vax-frames/direct-gpt4.jsonl \
+    --output_path /shared/aifiles/disk1/media/artifacts/cfact/co-vax-frames/results-direct-gpt4-test.txt
+
 
 python gpt_gleam/labeled.py \
   --config configs/cfact/cot-gpt4.yaml \
