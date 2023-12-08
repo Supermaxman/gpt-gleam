@@ -23,9 +23,7 @@ class TabularResultsWriter:
         for k, v in results.items():
             k = k.replace("_", " ").title()
             if any(k.endswith(f" {m}") for m in self.point_metrics):
-                print(v)
                 v = f"{v * 100:.1f}"
-                print(v)
             else:
                 v = f"{v:.3f}"
             f_results[k] = v
@@ -33,7 +31,7 @@ class TabularResultsWriter:
 
     def write(self, results: dict[str, float]):
         results = self._format_values(results)
-        df = pd.DataFrame.from_records([results])
+        df = pd.DataFrame.from_records([results], coerce_float=False)
         self.file.write(df.to_markdown(index=False))
         print(df.to_markdown(index=False))
         self.file.flush()
