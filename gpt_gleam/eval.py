@@ -25,7 +25,7 @@ def main(
                 pred = Stance.No_Stance.value.lower()
                 # TODO track missing predictions
             else:
-                pred = preds[(post.id, frame.id)].lower()
+                pred = preds[(post.id, frame.id)].lower().strip().split("\n")[-1]
 
             if stance == Stance.No_Stance:
                 # actual negative
