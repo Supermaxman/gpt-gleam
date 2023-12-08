@@ -3,7 +3,7 @@ seed: 0
 delay: 1
 model: gpt-4-vision-preview
 max_tokens: 8
-temperature: 0.0
+temperature: 1.0
 top_p: 0.7
 system_prompt: >-
   You are an expert linguistic assistant.
