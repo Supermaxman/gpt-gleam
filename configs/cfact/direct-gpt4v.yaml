@@ -4,6 +4,7 @@ delay: 1
 model: gpt-4-vision-preview
 max_tokens: 8
 temperature: 0.0
+top_p: 0.7
 system_prompt: >-
   You are an expert linguistic assistant.
   Frames of communication select particular aspects of an issue and make them salient in communicating a message.
