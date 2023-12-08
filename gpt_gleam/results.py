@@ -31,7 +31,9 @@ class TabularResultsWriter:
 
     def write(self, results: dict[str, float]):
         results = self._format_values(results)
+        print(results)
         df = pd.DataFrame.from_records([results], coerce_float=False)
+        print(df)
         self.file.write(df.to_markdown(index=False))
         print(df.to_markdown(index=False))
         self.file.flush()
