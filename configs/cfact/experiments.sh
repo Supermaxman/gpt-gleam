@@ -83,3 +83,10 @@ python gpt_gleam/labeled.py \
   --data_path /shared/hltdir4/disk1/team/data/corpora/co-vax-frames/covid19/co-vax-frames-test.jsonl \
   --frame_path /shared/hltdir4/disk1/team/data/corpora/co-vax-frames/covid19/frames.json \
   --output_path /shared/aifiles/disk1/media/artifacts/cfact/co-vax-frames/cot-gpt3.5.jsonl
+
+
+python gpt_gleam/unlabeled.py \
+  --config configs/cfact/cfact-gpt3.5.yaml \
+  --data_path /shared/hltdir4/disk1/team/data/corpora/co-vax-frames/covid19/co-vax-frames-test.jsonl \
+  --frame_path /shared/hltdir4/disk1/team/data/corpora/co-vax-frames/covid19/frames.json \
+  --output_path /shared/aifiles/disk1/media/artifacts/cfact/co-vax-frames/cfact-gpt3.5.jsonl
