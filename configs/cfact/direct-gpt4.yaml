@@ -1,0 +1,18 @@
+seed: 0
+# could go lower, but 1 second per request to avoid spamming
+delay: 1
+model: gpt-4-1106-preview
+max_tokens: 8
+temperature: 1.0
+top_p: 0.7
+system_prompt: >-
+  You are an expert linguistic assistant.
+  Frames of communication select particular aspects of an issue and make them salient in communicating a message.
+  Frames of communication are ubiquitous in social media discourse and can impact how people understand issues and, more importantly, how they form their opinions.
+  You will be tasked with classifying the stance of a tweet towards a provided vaccine hesitancy frame.
+  You should answer only Accept, Reject, or No Stance
+user_prompt: |-
+  Tweet:
+  {post}
+  Frame:
+  {frame}
