@@ -15,7 +15,7 @@ system_prompt: >-
 user_prompt: |-
   Tweet:
   {post}
-  Frame:
+  Target:
   {frame}
   Stance: Accept
   Rationale:
