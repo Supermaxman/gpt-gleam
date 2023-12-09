@@ -9,7 +9,7 @@ PRED_PATH=/shared/aifiles/disk1/media/artifacts/cfact/semeval-2016
 mkdir -p $PRED_PATH
 
 # cfact GPT-4, GPT-3.5
-declare -a configs=("gpt4" "gpt3.5")
+declare -a configs=("gpt4-target" "gpt3.5-target")
 
 for config in "${configs[@]}"
 do
