@@ -103,6 +103,12 @@ python gpt_gleam/unlabeled.py \
   --frame_path /shared/hltdir4/disk1/team/data/corpora/co-vax-frames/covid19/frames.json \
   --output_path /shared/aifiles/disk1/media/artifacts/cfact/co-vax-frames/cfact-gpt3.5.jsonl
 
+python gpt_gleam/verify.py \
+  --config configs/cfact/verify-gpt3.5.yaml \
+  --frame_path /shared/hltdir4/disk1/team/data/corpora/co-vax-frames/covid19/frames.json \
+  --data_path /shared/hltdir4/disk1/team/data/corpora/co-vax-frames/covid19/co-vax-frames-test.jsonl \
+  --cfact_path /shared/aifiles/disk1/media/artifacts/cfact/co-vax-frames/cfact-gpt3.5.jsonl \
+  --output_path /shared/aifiles/disk1/media/artifacts/cfact/co-vax-frames/verify-gpt3.5-test.jsonl
 
 
 python gpt_gleam/labeled.py \
@@ -133,3 +139,10 @@ python gpt_gleam/eval.py \
     --frame_path /shared/hltdir4/disk1/team/data/corpora/co-vax-frames/covid19/frames.json \
     --pred_path /shared/aifiles/disk1/media/artifacts/cfact/co-vax-frames/direct-llava.jsonl \
     --output_path /shared/aifiles/disk1/media/artifacts/cfact/co-vax-frames/results-direct-llava-test.txt
+
+
+python gpt_gleam/eval.py \
+    --data_path /shared/aifiles/disk1/media/twitter/v10/data/test.jsonl \
+    --frame_path /shared/hltdir4/disk1/team/data/corpora/co-vax-frames/covid19/frames.json \
+    --pred_path /shared/aifiles/disk1/media/artifacts/cfact/co-vax-frames/cot-llava.jsonl \
+    --output_path /shared/aifiles/disk1/media/artifacts/cfact/co-vax-frames/results-cot-llava-test.txt --full_text
