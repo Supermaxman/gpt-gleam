@@ -16,10 +16,10 @@ do
     echo "Running $config"
 
     python gpt_gleam/labeled.py \
-    --config configs/cfact/$config.yaml \
-    --data_path $DATA_PATH/test.jsonl \
-    --frame_path $DATA_PATH/frames.json \
-    --output_path $PRED_PATH/$config.jsonl
+        --config configs/cfact/$config.yaml \
+        --data_path $DATA_PATH/test.jsonl \
+        --frame_path $DATA_PATH/frames.json \
+        --output_path $PRED_PATH/$config.jsonl
 
     python gpt_gleam/eval.py \
         --data_path $DATA_PATH/test.jsonl \
