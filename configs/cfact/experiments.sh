@@ -157,3 +157,10 @@ python gpt_gleam/eval.py \
     --frame_path /shared/hltdir4/disk1/team/data/corpora/co-vax-frames/covid19/frames.json \
     --pred_path /shared/aifiles/disk1/media/artifacts/cfact/co-vax-frames/cot-llava.jsonl \
     --output_path /shared/aifiles/disk1/media/artifacts/cfact/co-vax-frames/results-cot-llava-test.txt --full_text
+
+
+python gpt_gleam/eval.py \
+    --data_path /shared/aifiles/disk1/media/twitter/v10/data/test.jsonl \
+    --frame_path /shared/hltdir4/disk1/team/data/corpora/co-vax-frames/covid19/frames.json \
+    --pred_path /shared/aifiles/disk1/media/artifacts/cfact/co-vax-frames/cfact-llava.jsonl \
+    --output_path /shared/aifiles/disk1/media/artifacts/cfact/co-vax-frames/results-cfact-llava-test.txt --full_text
