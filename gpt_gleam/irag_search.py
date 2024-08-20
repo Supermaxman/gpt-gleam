@@ -34,7 +34,7 @@ def main(
     model.cuda()
     model.eval()
 
-    context_length = 256
+    context_length = 77
 
     def get_text_embeddings(text_list):
         texts = tokenizer(text_list, context_length=context_length).cuda()
