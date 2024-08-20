@@ -18,7 +18,7 @@ def main(
         for ex in read_jsonl(data_path):
             post_id = ex["id"]
             f_demos = []
-            for f_id, f_stance in ex["label"].items():
+            for f_id, f_stance in ex["labels"].items():
                 if f_stance != Stance.Accept.value:
                     continue
                 frame = frames[f_id]
