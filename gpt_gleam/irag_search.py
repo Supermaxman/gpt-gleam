@@ -6,6 +6,7 @@ from gpt_gleam.data import TweetPreprocessConfig, preprocess_tweet, read_jsonl
 
 from open_clip import create_model_from_pretrained, get_tokenizer
 import torch
+from PIL import Image
 
 from tqdm import tqdm
 
@@ -61,6 +62,7 @@ def main(
         data_folder = os.path.dirname(data_path)
         image_path = os.path.join(data_folder, image_relative_path)
         # image_url = encode_image_url(image_path)
+        image = Image.open(image_path)
 
         f_demos = ex["f_demo"]
         f_demos_content = ex["f_demo_content"]
@@ -68,7 +70,7 @@ def main(
             {
                 "id": ex_id,
                 "text": ex_text,
-                "image": image_path,
+                "image": image,
                 "f_demos": f_demos,
                 "f_demos_content": f_demos_content,
                 "post": ex,
