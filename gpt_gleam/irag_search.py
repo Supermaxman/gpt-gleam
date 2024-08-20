@@ -116,7 +116,8 @@ def main(
                     "post": d["post"],
                     "response": d["response"],
                 }
-                for d in top_k_examples
+                # reverse to show most similar last in chat
+                for d in reversed(top_k_examples)
             ]
             f.write(json.dumps(ex) + "\n")
 
