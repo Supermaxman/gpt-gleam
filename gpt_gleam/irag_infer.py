@@ -8,7 +8,7 @@ from tqdm import tqdm
 from gpt_gleam.chat import ChatContextCreator, chat, print_messages
 from gpt_gleam.configuration import ChatCompletionConfig
 
-from gpt_gleam.data import Stance, iterate_post_frame_problems_labeled_pairs, load_demos
+from gpt_gleam.data import Stance, iterate_posts
 from gpt_gleam.predictions import JsonlPredictionsWriter
 from gpt_gleam.progress import ChatCompletionProgress
 
@@ -16,10 +16,7 @@ from gpt_gleam.progress import ChatCompletionProgress
 def main(
     config: ChatCompletionConfig,
     data_path: str,
-    frame_path: str,
-    problem_path: str,
     demo_data_path: str,
-    demo_path: str,
     output_path: str,
     total: Optional[int] = None,
     debug: bool = False,
@@ -29,36 +26,22 @@ def main(
         api_key=os.getenv("OPENAI_API_KEY"),
         timeout=os.getenv("OPENAI_TIMEOUT", 90),
     )
-    # TODO load demo posts, etc from demo_data_path
-    # TODO load demo responses from demo_path
-    print("Loading demos...")
-    demo_lookup = load_demos(demo_path)
-    for post, frame, _, problems in iterate_post_frame_problems_labeled_pairs(
-        demo_data_path, frame_path, problem_path, skip_stances=[Stance.Not_Relevant, Stance.No_Stance, Stance.Reject]
-    ):
-        ex_id = f"{post.id}-{frame.id}"
-
     if total is None:
         print("Counting total number of examples (requires iteration)...")
-        total = sum(
-            1
-            for _ in iterate_post_frame_problems_labeled_pairs(
-                data_path, frame_path, problem_path, skip_stances=[Stance.Not_Relevant, Stance.No_Stance, Stance.Reject]
-            )
-        )
+        total = sum(1 for _ in iterate_posts(data_path, demo_data_path=demo_data_path))
         print(f"Total predictions: {total:,}")
 
     with (
         JsonlPredictionsWriter(output_path) as preds,
         ChatCompletionProgress(total=total, seen=len(preds), disable=debug) as bar,
     ):
-        for post, frame, _, problems in iterate_post_frame_problems_labeled_pairs(
-            data_path, frame_path, problem_path, skip_stances=[Stance.Not_Relevant, Stance.No_Stance, Stance.Reject]
-        ):
-            ex_id = f"{post.id}-{frame.id}"
+        for post in iterate_posts(data_path, demo_data_path=demo_data_path):
+            ex_id = f"{post.id}"
             if ex_id in preds:
                 continue
-            messages = creator.create_context(post, frame, problems=problems)
+            if not any(s == Stance.Accept for s in post.labels.values()):
+                continue
+            messages = creator.create_context(post, demos=post.demonstrations)
             completion = chat(
                 client,
                 delay=config.delay,
@@ -71,10 +54,10 @@ def main(
                 response_format=config.response_format,
             )
             if completion is None:
-                print(f"Skipping example due to API safety error: {post.id}, {frame.id}")
+                print(f"Skipping example due to API safety error: {post.id}")
                 continue
             content = completion.choices[0].message.content
-            preds.add({"id": ex_id, "post_id": post.id, "f_id": frame.id, "content": content})
+            preds.add({"id": ex_id, "post_id": post.id, "content": content})
             messages.append({"role": "assistant", "content": content})
             if debug:
                 print_messages(messages)
@@ -85,10 +68,7 @@ if __name__ == "__main__":
     parser = argparse.ArgumentParser()
     parser.add_argument("--config", type=str, required=True, help="path to config file")
     parser.add_argument("--data_path", type=str, required=True, help="path to data jsonl file")
-    parser.add_argument("--frame_path", type=str, required=True, help="path to frames json file")
-    parser.add_argument("--problem_path", type=str, required=True, help="path to problems json file")
-    parser.add_argument("--demo_data_path", type=str, required=True, help="path to demo posts jsonl file")
-    parser.add_argument("--demo_path", type=str, required=True, help="path to demos jsonl file")
+    parser.add_argument("--demo_data_path", type=str, required=True, help="path to demo data jsonl file")
     parser.add_argument("--output_path", type=str, required=True, help="path to output jsonl file")
     parser.add_argument("--total", type=int, help="total number of examples to process")
     parser.add_argument("--debug", action="store_true", help="debug mode")
@@ -101,10 +81,7 @@ if __name__ == "__main__":
     main(
         config=config,
         data_path=args.data_path,
-        frame_path=args.frame_path,
-        problem_path=args.problem_path,
         demo_data_path=args.demo_data_path,
-        demo_path=args.demo_path,
         output_path=args.output_path,
         total=args.total,
         debug=args.debug,

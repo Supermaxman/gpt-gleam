@@ -237,7 +237,7 @@ class Post:
     text: str
     image_url: Optional[str] = None
     labels: Optional[dict[str, Stance]] = None
-    demonstrations: Optional[dict[str, str]] = None
+    demonstrations: Optional[list["Demonstration"]] = None
     cfacts: Optional[dict[str, list[StanceCounterFactual]]] = None
 
 
@@ -301,8 +301,46 @@ def load_problems(problem_path: str, preprocess_config: Optional[TweetPreprocess
     return problem_objs
 
 
+def load_post(
+    ex: dict,
+    data_path: str,
+    preprocess_config: TweetPreprocessConfig,
+    cfacts: Optional[dict] = None,
+    demo_data_path: Optional[str] = None,
+) -> Post:
+    ex_id = ex["id"]
+    ex_text = ex["text"]
+    ex_text = ex_text.strip().replace("\r", " ").replace("\n", " ")
+    ex_text = preprocess_tweet(ex_text, preprocess_config)
+    result = {"id": ex_id, "text": ex_text}
+    if "images" in ex:
+        image_relative_path = ex["images"][0]
+        data_folder = os.path.dirname(data_path)
+        image_path = os.path.join(data_folder, image_relative_path)
+        image_url = encode_image_url(image_path)
+        result["image_url"] = image_url
+    if "labels" in ex:
+        result["labels"] = {f_id: Stance[stance.replace(" ", "_")] for f_id, stance in ex["labels"].items()}
+    if "demonstrations" in ex:
+        demonstrations = ex["demonstrations"]
+        result["demonstrations"] = [
+            Demonstration(
+                post=load_post(d["post"], demo_data_path, preprocess_config, cfacts=cfacts), response=d["response"]
+            )
+            for d in demonstrations
+        ]
+    if cfacts is not None and ex_id in cfacts:
+        # f_id -> list[CounterFactual]
+        ex_cfacts = cfacts[ex_id]
+        result["cfacts"] = ex_cfacts
+    result = Post(**result)
+
+
 def iterate_posts(
-    data_path: str, preprocess_config: Optional[TweetPreprocessConfig] = None, cfact_path: Optional[str] = None
+    data_path: str,
+    preprocess_config: Optional[TweetPreprocessConfig] = None,
+    cfact_path: Optional[str] = None,
+    demo_data_path: Optional[str] = None,
 ) -> Iterator[Post]:
     if preprocess_config is None:
         preprocess_config = TweetPreprocessConfig(
@@ -332,28 +370,8 @@ def iterate_posts(
                 f_cfacts.sort(key=lambda x: STANCE_ORDER.index(x.stance))
 
     for ex in read_jsonl(data_path):
-        ex_id = ex["id"]
-        ex_text = ex["text"]
-        ex_text = ex_text.strip().replace("\r", " ").replace("\n", " ")
-        ex_text = preprocess_tweet(ex_text, preprocess_config)
-        result = {"id": ex_id, "text": ex_text}
-        if "images" in ex:
-            image_relative_path = ex["images"][0]
-            data_folder = os.path.dirname(data_path)
-            image_path = os.path.join(data_folder, image_relative_path)
-            image_url = encode_image_url(image_path)
-            result["image_url"] = image_url
-        if "labels" in ex:
-            result["labels"] = {f_id: Stance[stance.replace(" ", "_")] for f_id, stance in ex["labels"].items()}
-        if "demonstrations" in ex:
-            demonstrations = ex["demonstrations"]
-            result["demonstrations"] = demonstrations
-        if ex_id in cfacts:
-            # f_id -> list[CounterFactual]
-            ex_cfacts = cfacts[ex_id]
-            result["cfacts"] = ex_cfacts
-        result = Post(**result)
-        yield result
+        post = load_post(ex, data_path, preprocess_config, cfacts=cfacts, demo_data_path=demo_data_path)
+        yield post
 
 
 def iterate_post_frame_labeled_pairs(

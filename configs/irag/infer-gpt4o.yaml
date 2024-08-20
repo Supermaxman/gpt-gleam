@@ -81,16 +81,8 @@ system_prompt: >-
   Frames of communication select particular aspects of an issue and make them salient in communicating a message.
   Salient aspects are referred to as problems, which are addressed through articulated causes when authors communicate via framing.
   Frames of communication are ubiquitous in social media discourse and can impact how people understand issues and, more importantly, how they form their opinions.
-  Each frame of communication will be provided, along with problems addressed by the frame of communication.
-  You will be tasked with explaining why a post evokes a particular frame of communication by articulating the causes provided for the addressed problems.
-  Not necessarily every problem addressed by the frame of communication will be addressed in the post, so be sure to only consider problems supported by articulated causes.
+  You will be tasked with identifying the problems a social media post addresses, as well as articulating evoked frames of communication by articulating the causes provided for the addressed problems.
   You should discuss your reasoning in detail, thinking step-by-step.
 user_prompt: |-
-  Frame of Communication: 
-  {frame}
-
-  Problems Addressed by Frame of Communication:
-  {problems}
-  
   Post:
   {post}
