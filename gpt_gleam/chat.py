@@ -101,8 +101,10 @@ class ChatContextCreator:
         if frame is not None:
             values["frame"] = frame.text
 
-        if frame.problems is not None and problems is not None:
-            values["problems"] = "\n".join([f"{problems[p_id].id}: {problems[p_id].claim}" for p_id in frame.problems])
+            if frame.problems is not None and problems is not None:
+                values["problems"] = "\n".join(
+                    [f"{problems[p_id].id}: {problems[p_id].claim}" for p_id in frame.problems]
+                )
 
         if stance is not None:
             values["stance"] = stance.value
