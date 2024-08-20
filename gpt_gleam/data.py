@@ -341,6 +341,7 @@ def load_post(
         ex_cfacts = cfacts[ex_id]
         result["cfacts"] = ex_cfacts
     result = Post(**result)
+    return result
 
 
 def iterate_posts(
