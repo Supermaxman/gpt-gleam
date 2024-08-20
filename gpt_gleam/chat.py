@@ -1,7 +1,8 @@
+import dataclasses
 import time
 from typing import Optional
 from gpt_gleam.configuration import ChatCompletionConfig
-from gpt_gleam.data import Frame, Post, Problem, Stance
+from gpt_gleam.data import Demonstration, Frame, Post, Problem, Stance
 
 from openai import OpenAI, BadRequestError
 from openai.types.chat import ChatCompletion
@@ -77,6 +78,9 @@ class ChatContextCreator:
             ],
         }
 
+    def create_response_prompt(self, content: str):
+        return {"role": "assistant", "content": content}
+
     def build_context(self):
         messages = [
             {"role": "system", "content": self.system_prompt},
@@ -126,8 +130,13 @@ class ChatContextCreator:
         frame: Optional[Frame] = None,
         stance: Optional[Stance] = None,
         problems: Optional[dict[str, Problem]] = None,
+        demos: Optional[list[Demonstration]] = None,
         **kwargs,
     ):
         messages = self.build_context()
+        if demos is not None:
+            for demo in demos:
+                messages.append(self.create_prompt(demo.post, demo.frame, demo.stance, demo.problems, **kwargs))
+                messages.append(self.create_response_prompt(demo.response))
         messages.append(self.create_prompt(post, frame, stance, problems, **kwargs))
         return messages
