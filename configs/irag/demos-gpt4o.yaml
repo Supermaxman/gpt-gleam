@@ -53,6 +53,7 @@ response_format:
             required:
               - problem
               - explanation
+              - locations
             additionalProperties: false
         frame_rationale:
           description: Explain why the provided frame of communication is evoked by this post, drawing upon each addressed problem. Specifically articulate the frame of communication in your explanation.
