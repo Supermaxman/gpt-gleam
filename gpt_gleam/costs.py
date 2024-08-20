@@ -14,9 +14,9 @@ class CompletionUsageEstimate:
 class CompletionUsageEstimator:
     def __init__(
         self,
-        completion_cost: float = 0.03,
+        completion_cost: float = 0.01,
         completion_cost_tokens: int = 1000,
-        prompt_cost: float = 0.01,
+        prompt_cost: float = 0.0025,
         prompt_cost_tokens: int = 1000,
     ):
         self.running_completion_tokens = 0
@@ -44,14 +44,8 @@ class CompletionUsageEstimator:
         # linearly interpolate by computing average tokens per prompt and multiplying by remaining prompts
         completion_tokens_per_prompt = self.running_completion_tokens / self.prompts
         prompt_tokens_per_prompt = self.running_prompt_tokens / self.prompts
-        total_completion_tokens = (
-            self.running_completion_tokens
-            + self.remaining_prompts * completion_tokens_per_prompt
-        )
-        total_prompt_tokens = (
-            self.running_prompt_tokens
-            + self.remaining_prompts * prompt_tokens_per_prompt
-        )
+        total_completion_tokens = self.running_completion_tokens + self.remaining_prompts * completion_tokens_per_prompt
+        total_prompt_tokens = self.running_prompt_tokens + self.remaining_prompts * prompt_tokens_per_prompt
         completion_cost = total_completion_tokens * self.completion_cost
         prompt_cost = total_prompt_tokens * self.prompt_cost
         total_cost = completion_cost + prompt_cost
