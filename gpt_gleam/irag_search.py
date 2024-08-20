@@ -30,7 +30,7 @@ def main(
         remove_accented_characters=False,
     )
     print(f"Loading Model: {model_name}")
-    batch_size = 32
+    batch_size = 64
     model, preprocess = create_model_from_pretrained(model_name)
     tokenizer = get_tokenizer(model_name)
     model.cuda()
@@ -38,20 +38,24 @@ def main(
 
     context_length = 77
 
-    def get_text_embeddings(text_list):
+    def get_text_embeddings(text_list, progress=True):
         all_features = []
-        for b in tqdm(batch(text_list, batch_size), total=(len(text_list) + batch_size - 1) // batch_size):
+        for b in tqdm(
+            batch(text_list, batch_size), total=(len(text_list) + batch_size - 1) // batch_size, disable=not progress
+        ):
             texts = tokenizer(b, context_length=context_length).cuda()
             text_features = model.encode_text(texts)
             all_features.append(text_features)
 
         return torch.cat(all_features, dim=0)
 
-    def get_image_embeddings(image_list):
+    def get_image_embeddings(image_list, progress=True):
         # images = torch.stack([preprocess(img) for img in image_list]).cuda()
         # image_features = model.encode_image(images)
         all_features = []
-        for b in tqdm(batch(image_list, batch_size), total=(len(image_list) + batch_size - 1) // batch_size):
+        for b in tqdm(
+            batch(image_list, batch_size), total=(len(image_list) + batch_size - 1) // batch_size, disable=not progress
+        ):
             images = torch.stack([preprocess(img) for img in b]).cuda()
             image_features = model.encode_image(images)
             all_features.append(image_features)
@@ -96,8 +100,8 @@ def main(
         combined_embeddings = torch.cat([text_embeddings, image_embeddings], dim=1)
 
     def search_index(text: str, image_path: str, top_k: int):
-        text_features = get_text_embeddings([text])
-        image_features = get_image_embeddings([image_path])
+        text_features = get_text_embeddings([text], progress=False)
+        image_features = get_image_embeddings([image_path], progress=False)
         combined_features = torch.cat([text_features, image_features], dim=1)
 
         similarities = torch.einsum("ij,kj->i", combined_embeddings, combined_features)
@@ -118,9 +122,6 @@ def main(
             image_relative_path = ex["images"][0]
             data_folder = os.path.dirname(data_path)
             image_path = os.path.join(data_folder, image_relative_path)
-
-            f_demos = ex["f_demo"]
-            f_demos_content = ex["f_demo_content"]
 
             top_k_examples = search_index(ex_text, image_path, top_k)
             ex["demonstrations"] = [
