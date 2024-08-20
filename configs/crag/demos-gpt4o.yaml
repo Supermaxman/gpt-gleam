@@ -12,9 +12,10 @@ system_prompt: >-
   Frames of communication are ubiquitous in social media discourse and can impact how people understand issues and, more importantly, how they form their opinions.
   You will be tasked with explaining why a tweet addresses a particular framing problem by articulating the causes provided for the framing problem.
   You should discuss your reasoning in detail, thinking step-by-step.
+  If multiple causes are articulated for the provided problem, be sure to explicitly discuss each cause.
   Make sure to explain how the image and text together contribute to addressing the problem.
 user_prompt: |-
-  Tweet:
-  {post}
   Problem: 
   {problem}
+  Tweet:
+  {post}
