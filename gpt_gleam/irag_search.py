@@ -105,7 +105,7 @@ def main(
         image_features = get_image_embeddings([image], progress=False)
         combined_features = torch.cat([text_features, image_features], dim=1)
 
-        similarities = torch.einsum("ij,kj->i", combined_embeddings, combined_features)
+        similarities = combined_embeddings @ combined_features.T
         top_k_indices = similarities.argsort(descending=True)[:top_k]
         return [examples[i] for i in top_k_indices]
 
