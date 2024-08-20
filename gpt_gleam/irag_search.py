@@ -99,43 +99,43 @@ def main(
         image_embeddings = get_image_embeddings([ex["image"] for ex in examples])
         combined_embeddings = torch.cat([text_embeddings, image_embeddings], dim=1)
 
-    def search_index(text: str, image_path: str, top_k: int):
-        image = Image.open(image_path)
-        text_features = get_text_embeddings([text], progress=False)
-        image_features = get_image_embeddings([image], progress=False)
-        combined_features = torch.cat([text_features, image_features], dim=1)
+        def search_index(text: str, image_path: str, top_k: int):
+            image = Image.open(image_path)
+            text_features = get_text_embeddings([text], progress=False)
+            image_features = get_image_embeddings([image], progress=False)
+            combined_features = torch.cat([text_features, image_features], dim=1)
 
-        similarities = combined_embeddings @ combined_features.T
-        top_k_indices = similarities.argsort(descending=True)[:top_k]
-        return [examples[i] for i in top_k_indices]
+            similarities = torch.einsum("ij,kj->i", combined_embeddings, combined_features)
+            top_k_indices = similarities.argsort(descending=True)[:top_k]
+            return [examples[i] for i in top_k_indices]
 
-    total = sum(1 for _ in read_jsonl(data_path))
-    print(f"Searching Index: {total:,} to search")
-    # next, search index
-    with open(output_path, "w") as f:
-        for ex in tqdm(read_jsonl(data_path), total=total):
-            ex_id = ex["id"]
-            ex_text = ex["text"]
-            ex_text = ex_text.strip().replace("\r", " ").replace("\n", " ")
-            ex_text = preprocess_tweet(ex_text, preprocess_config)
-            # if "images" in ex:
-            # Assume multimodal data
-            image_relative_path = ex["images"][0]
-            data_folder = os.path.dirname(data_path)
-            image_path = os.path.join(data_folder, image_relative_path)
+        total = sum(1 for _ in read_jsonl(data_path))
+        print(f"Searching Index: {total:,} to search")
+        # next, search index
+        with open(output_path, "w") as f:
+            for ex in tqdm(read_jsonl(data_path), total=total):
+                ex_id = ex["id"]
+                ex_text = ex["text"]
+                ex_text = ex_text.strip().replace("\r", " ").replace("\n", " ")
+                ex_text = preprocess_tweet(ex_text, preprocess_config)
+                # if "images" in ex:
+                # Assume multimodal data
+                image_relative_path = ex["images"][0]
+                data_folder = os.path.dirname(data_path)
+                image_path = os.path.join(data_folder, image_relative_path)
 
-            top_k_examples = search_index(ex_text, image_path, top_k)
-            ex["demonstrations"] = [
-                {
-                    "post": d["post"],
-                    "response": d["response"],
-                }
-                # reverse to show most similar last in chat
-                for d in reversed(top_k_examples)
-            ]
-            f.write(json.dumps(ex) + "\n")
+                top_k_examples = search_index(ex_text, image_path, top_k)
+                ex["demonstrations"] = [
+                    {
+                        "post": d["post"],
+                        "response": d["response"],
+                    }
+                    # reverse to show most similar last in chat
+                    for d in reversed(top_k_examples)
+                ]
+                f.write(json.dumps(ex) + "\n")
 
-    print(f"Output: {output_path}")
+        print(f"Output: {output_path}")
 
 
 if __name__ == "__main__":
