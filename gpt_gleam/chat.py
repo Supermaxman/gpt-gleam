@@ -1,7 +1,7 @@
 import time
 from typing import Optional
 from gpt_gleam.configuration import ChatCompletionConfig
-from gpt_gleam.data import Frame, Post, Stance
+from gpt_gleam.data import Frame, Post, Problem, Stance
 
 from openai import OpenAI, BadRequestError
 from openai.types.chat import ChatCompletion
@@ -83,12 +83,22 @@ class ChatContextCreator:
         ]
         return messages
 
-    def build_prompt(self, post: Post, frame: Optional[Frame] = None, stance: Optional[Stance] = None, **kwargs) -> str:
+    def build_prompt(
+        self,
+        post: Post,
+        frame: Optional[Frame] = None,
+        stance: Optional[Stance] = None,
+        problems: Optional[dict[str, Problem]] = None,
+        **kwargs,
+    ) -> str:
         values = {
             "post": post.text,
         }
         if frame is not None:
             values["frame"] = frame.text
+
+        if frame.problems is not None and problems is not None:
+            values["problems"] = "\n".join([f"{problems[p_id].id}: {problems[p_id].claim}" for p_id in frame.problems])
 
         if stance is not None:
             values["stance"] = stance.value
@@ -96,14 +106,28 @@ class ChatContextCreator:
         content = self.user_prompt.format(**values)
         return content
 
-    def create_prompt(self, post: Post, frame: Optional[Frame] = None, stance: Optional[Stance] = None, **kwargs):
+    def create_prompt(
+        self,
+        post: Post,
+        frame: Optional[Frame] = None,
+        stance: Optional[Stance] = None,
+        problems: Optional[dict[str, Problem]] = None,
+        **kwargs,
+    ):
         content = self.build_prompt(post, frame, stance, **kwargs)
         if post.image_url is None:
             return self.create_text_prompt(content)
         else:
             return self.create_image_prompt(content, post.image_url)
 
-    def create_context(self, post: Post, frame: Optional[Frame] = None, stance: Optional[Stance] = None, **kwargs):
+    def create_context(
+        self,
+        post: Post,
+        frame: Optional[Frame] = None,
+        stance: Optional[Stance] = None,
+        problems: Optional[dict[str, Problem]] = None,
+        **kwargs,
+    ):
         messages = self.build_context()
         messages.append(self.create_prompt(post, frame, stance, **kwargs))
         return messages

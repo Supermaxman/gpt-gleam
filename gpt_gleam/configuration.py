@@ -11,3 +11,4 @@ class ChatCompletionConfig:
     top_p: float
     system_prompt: str
     user_prompt: str
+    response_format: dict | None = None

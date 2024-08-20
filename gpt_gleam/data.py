@@ -397,6 +397,26 @@ def iterate_post_frame_problem_labeled_pairs(
                 yield post, frame, stance, problem
 
 
+def iterate_post_frame_problems_labeled_pairs(
+    data_path: str,
+    frame_path: str,
+    problem_path: str,
+    preprocess_config: Optional[TweetPreprocessConfig] = None,
+    skip_stances: Optional[list[Stance]] = None,
+    cfact_path: Optional[str] = None,
+):
+    problems = load_problems(problem_path, preprocess_config)
+    for post, frame, stance in iterate_post_frame_labeled_pairs(
+        data_path, frame_path, preprocess_config=preprocess_config, skip_stances=skip_stances, cfact_path=cfact_path
+    ):
+        ex_problems: dict[str, Problem] = {}
+        if frame.problems is not None and len(frame.problems) > 0:
+            for p_id in frame.problems:
+                problem = problems[p_id]
+                ex_problems[p_id] = problem
+        yield post, frame, stance, ex_problems
+
+
 def iterate_post_problem_labeled_pairs(
     data_path: str,
     frame_path: str,
