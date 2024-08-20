@@ -397,6 +397,30 @@ def iterate_post_frame_problem_labeled_pairs(
                 yield post, frame, stance, problem
 
 
+def iterate_post_problem_labeled_pairs(
+    data_path: str,
+    frame_path: str,
+    problem_path: str,
+    preprocess_config: Optional[TweetPreprocessConfig] = None,
+    skip_stances: Optional[list[Stance]] = None,
+    cfact_path: Optional[str] = None,
+):
+    seen_pairs = set()
+    for post, _, _, problem in iterate_post_frame_problem_labeled_pairs(
+        data_path,
+        frame_path,
+        problem_path,
+        preprocess_config=preprocess_config,
+        skip_stances=skip_stances,
+        cfact_path=cfact_path,
+    ):
+        pair_id = f"{post.id}-{problem.id}"
+        if pair_id in seen_pairs:
+            continue
+        seen_pairs.add(pair_id)
+        yield post, problem
+
+
 def iterate_post_frame_unlabeled_pairs(
     data_path: str,
     frame_path: str,

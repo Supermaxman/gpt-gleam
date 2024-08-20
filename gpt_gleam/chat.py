@@ -83,25 +83,27 @@ class ChatContextCreator:
         ]
         return messages
 
-    def build_prompt(self, post: Post, frame: Frame, stance: Optional[Stance] = None, **kwargs) -> str:
+    def build_prompt(self, post: Post, frame: Optional[Frame] = None, stance: Optional[Stance] = None, **kwargs) -> str:
         values = {
             "post": post.text,
-            "frame": frame.text,
         }
+        if frame is not None:
+            values["frame"] = frame.text
+
         if stance is not None:
             values["stance"] = stance.value
         values = {**values, **kwargs}
         content = self.user_prompt.format(**values)
         return content
 
-    def create_prompt(self, post: Post, frame: Frame, stance: Optional[Stance] = None, **kwargs):
+    def create_prompt(self, post: Post, frame: Optional[Frame] = None, stance: Optional[Stance] = None, **kwargs):
         content = self.build_prompt(post, frame, stance, **kwargs)
         if post.image_url is None:
             return self.create_text_prompt(content)
         else:
             return self.create_image_prompt(content, post.image_url)
 
-    def create_context(self, post: Post, frame: Frame, stance: Optional[Stance] = None, **kwargs):
+    def create_context(self, post: Post, frame: Optional[Frame] = None, stance: Optional[Stance] = None, **kwargs):
         messages = self.build_context()
         messages.append(self.create_prompt(post, frame, stance, **kwargs))
         return messages

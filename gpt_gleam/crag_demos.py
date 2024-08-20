@@ -8,7 +8,7 @@ from tqdm import tqdm
 from gpt_gleam.chat import ChatContextCreator, chat, print_messages
 from gpt_gleam.configuration import ChatCompletionConfig
 
-from gpt_gleam.data import Stance, iterate_post_frame_problem_labeled_pairs
+from gpt_gleam.data import Stance, iterate_post_problem_labeled_pairs
 from gpt_gleam.predictions import JsonlPredictionsWriter
 from gpt_gleam.progress import ChatCompletionProgress
 
@@ -32,7 +32,7 @@ def main(
         print("Counting total number of examples (requires iteration)...")
         total = sum(
             1
-            for _ in iterate_post_frame_problem_labeled_pairs(
+            for _ in iterate_post_problem_labeled_pairs(
                 data_path, frame_path, problem_path, skip_stances=[Stance.Not_Relevant, Stance.No_Stance, Stance.Reject]
             )
         )
@@ -42,13 +42,13 @@ def main(
         JsonlPredictionsWriter(output_path) as preds,
         ChatCompletionProgress(total=total, seen=len(preds), disable=debug) as bar,
     ):
-        for post, frame, stance, problem in iterate_post_frame_problem_labeled_pairs(
+        for post, problem in iterate_post_problem_labeled_pairs(
             data_path, frame_path, problem_path, skip_stances=[Stance.Not_Relevant, Stance.No_Stance, Stance.Reject]
         ):
-            ex_id = f"{post.id}-{frame.id}-{problem.id}"
+            ex_id = f"{post.id}-{problem.id}"
             if ex_id in preds:
                 continue
-            messages = creator.create_context(post, frame, stance, problem=f"{problem.id}: {problem.claim}")
+            messages = creator.create_context(post, problem=f"{problem.id}: {problem.claim}")
             completion = chat(
                 client,
                 delay=config.delay,
@@ -60,10 +60,10 @@ def main(
                 seed=config.seed,
             )
             if completion is None:
-                print(f"Skipping example due to API safety error: {post.id}, {frame.id}, {problem.id}")
+                print(f"Skipping example due to API safety error: {post.id}, {problem.id}")
                 continue
             content = completion.choices[0].message.content
-            preds.add({"id": ex_id, "post_id": post.id, "f_id": frame.id, "problem": problem.id, "content": content})
+            preds.add({"id": ex_id, "post_id": post.id, "problem": problem.id, "content": content})
             messages.append({"role": "assistant", "content": content})
             if debug:
                 print_messages(messages)
