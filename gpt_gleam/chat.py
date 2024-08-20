@@ -114,7 +114,7 @@ class ChatContextCreator:
         problems: Optional[dict[str, Problem]] = None,
         **kwargs,
     ):
-        content = self.build_prompt(post, frame, stance, **kwargs)
+        content = self.build_prompt(post, frame, stance, problems, **kwargs)
         if post.image_url is None:
             return self.create_text_prompt(content)
         else:
@@ -129,5 +129,5 @@ class ChatContextCreator:
         **kwargs,
     ):
         messages = self.build_context()
-        messages.append(self.create_prompt(post, frame, stance, **kwargs))
+        messages.append(self.create_prompt(post, frame, stance, problems, **kwargs))
         return messages
