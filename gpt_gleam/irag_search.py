@@ -16,7 +16,7 @@ def main(
     demo_data_path: str,
     output_path: str,
 ):
-    model_name = "hf-hub:laion/CLIP-ViT-B-16-laion2B-s34B-b88K"
+    model_name = "hf-hub:laion/CLIP-ViT-bigG-14-laion2B-39B-b160k"
     preprocess_config = TweetPreprocessConfig(
         do_lower_case=False,
         replace_usernames=False,
