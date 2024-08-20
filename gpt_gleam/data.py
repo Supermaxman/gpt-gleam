@@ -244,10 +244,10 @@ class Post:
 @dataclasses.dataclass
 class Demonstration:
     post: Post
+    response: str
     frame: Optional[Frame] = None
     stance: Optional[Stance] = None
     problems: Optional[dict[str, Problem]] = None
-    response: str
 
 
 def load_frames(frame_path: str, preprocess_config: Optional[TweetPreprocessConfig] = None) -> dict[str, Frame]:
