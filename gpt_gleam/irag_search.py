@@ -100,8 +100,9 @@ def main(
         combined_embeddings = torch.cat([text_embeddings, image_embeddings], dim=1)
 
     def search_index(text: str, image_path: str, top_k: int):
+        image = Image.open(image_path)
         text_features = get_text_embeddings([text], progress=False)
-        image_features = get_image_embeddings([image_path], progress=False)
+        image_features = get_image_embeddings([image], progress=False)
         combined_features = torch.cat([text_features, image_features], dim=1)
 
         similarities = torch.einsum("ij,kj->i", combined_embeddings, combined_features)
