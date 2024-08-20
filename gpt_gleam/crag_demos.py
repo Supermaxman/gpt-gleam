@@ -89,6 +89,7 @@ if __name__ == "__main__":
         config=config,
         data_path=args.data_path,
         frame_path=args.frame_path,
+        problem_path=args.problem_path,
         output_path=args.output_path,
         total=args.total,
         debug=args.debug,
