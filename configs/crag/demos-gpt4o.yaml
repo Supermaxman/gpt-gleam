@@ -10,13 +10,11 @@ system_prompt: >-
   Frames of communication select particular aspects of an issue and make them salient in communicating a message.
   Salient aspects are referred to as problems, which are addressed through articulated causes when authors communicate via framing.
   Frames of communication are ubiquitous in social media discourse and can impact how people understand issues and, more importantly, how they form their opinions.
-  You will be tasked with explaining why a tweet addresses a particular framing problem.
+  You will be tasked with explaining why a tweet addresses a particular framing problem by articulating the causes provided for the framing problem.
   You should discuss your reasoning in detail, thinking step-by-step.
   Make sure to explain how the image and text together contribute to addressing the problem.
 user_prompt: |-
   Tweet:
   {post}
-  Frame:
-  {frame}
   Problem: 
   {problem}
