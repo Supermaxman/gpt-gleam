@@ -201,6 +201,13 @@ def encode_image_url(image_path):
     return f"data:image/{image_type};base64,{base64_image}"
 
 
+def batch(iterable, n=1):
+    """Yield successive n-sized batches from an iterable."""
+    l = len(iterable)
+    for ndx in range(0, l, n):
+        yield iterable[ndx : min(ndx + n, l)]
+
+
 class Stance(str, Enum):
     Accept = "Accept"
     Reject = "Reject"

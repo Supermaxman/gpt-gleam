@@ -2,7 +2,7 @@ import argparse
 import os
 import ujson as json
 
-from gpt_gleam.data import TweetPreprocessConfig, preprocess_tweet, read_jsonl
+from gpt_gleam.data import TweetPreprocessConfig, preprocess_tweet, read_jsonl, batch
 
 from open_clip import create_model_from_pretrained, get_tokenizer
 import torch
@@ -30,6 +30,7 @@ def main(
         remove_accented_characters=False,
     )
     print(f"Loading Model: {model_name}")
+    batch_size = 32
     model, preprocess = create_model_from_pretrained(model_name)
     tokenizer = get_tokenizer(model_name)
     model.cuda()
@@ -38,14 +39,23 @@ def main(
     context_length = 77
 
     def get_text_embeddings(text_list):
-        texts = tokenizer(text_list, context_length=context_length).cuda()
-        text_features = model.encode_text(texts)
-        return text_features
+        all_features = []
+        for b in tqdm(batch(text_list, batch_size), total=(len(text_list) + batch_size - 1) // batch_size):
+            texts = tokenizer(b, context_length=context_length).cuda()
+            text_features = model.encode_text(texts)
+            all_features.append(text_features)
+
+        return torch.cat(all_features, dim=0)
 
     def get_image_embeddings(image_list):
-        images = torch.stack([preprocess(img) for img in image_list]).cuda()
-        image_features = model.encode_image(images)
-        return image_features
+        # images = torch.stack([preprocess(img) for img in image_list]).cuda()
+        # image_features = model.encode_image(images)
+        all_features = []
+        for b in tqdm(batch(image_list, batch_size), total=(len(image_list) + batch_size - 1) // batch_size):
+            images = torch.stack([preprocess(img) for img in b]).cuda()
+            image_features = model.encode_image(images)
+            all_features.append(image_features)
+        return torch.cat(all_features, dim=0)
 
     print(f"Loading Demo Data: {demo_data_path}")
     examples = []
