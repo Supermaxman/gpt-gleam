@@ -59,6 +59,8 @@ def main(
                         "frame": frame.text,
                     }
                 )
+            if len(f_demos) == 0:
+                continue
             ex["f_demo"] = {
                 "frames": f_demos,
             }
