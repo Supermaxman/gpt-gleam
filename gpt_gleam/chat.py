@@ -69,7 +69,10 @@ class ChatContextCreator:
                 {"type": "text", "text": content},
                 {
                     "type": "image_url",
-                    "image_url": image_url,
+                    "image_url": {
+                        "url": image_url,
+                        "detail": "high",
+                    },
                 },
             ],
         }
