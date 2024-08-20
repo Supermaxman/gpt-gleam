@@ -219,6 +219,13 @@ class Frame:
 
 
 @dataclasses.dataclass
+class Problem:
+    id: str
+    claim: str
+    counter_claim: str
+
+
+@dataclasses.dataclass
 class StanceCounterFactual:
     stance: Stance
     rationale: str
@@ -258,6 +265,31 @@ def load_frames(frame_path: str, preprocess_config: Optional[TweetPreprocessConf
         )
 
     return frame_objs
+
+
+def load_problems(problem_path: str, preprocess_config: Optional[TweetPreprocessConfig] = None) -> dict[str, Problem]:
+    if preprocess_config is None:
+        preprocess_config = TweetPreprocessConfig(
+            do_lower_case=False,
+            replace_usernames=False,
+            replace_urls=True,
+            asciify_emojis=False,
+            replace_multiple_usernames=False,
+            replace_multiple_urls=False,
+            standardize_punctuation=True,
+            remove_unicode_symbols=False,
+            remove_accented_characters=False,
+        )
+    with open(problem_path, "r") as f:
+        problems = json.load(f)
+
+    problem_objs = {}
+    for p_id, problem in problems.items():
+        problem["claim"] = preprocess_tweet(problem["claim"], preprocess_config)
+        problem["counter_claim"] = preprocess_tweet(problem["counter_claim"], preprocess_config)
+        problem_objs[p_id] = Problem(id=p_id, claim=problem["claim"], counter_claim=problem["counter_claim"])
+
+    return problem_objs
 
 
 def iterate_posts(
@@ -345,6 +377,24 @@ def iterate_post_frame_labeled_pairs(
                 continue
             frame = frames[f_id]
             yield post, frame, stance
+
+
+def iterate_post_frame_problem_labeled_pairs(
+    data_path: str,
+    frame_path: str,
+    problem_path: str,
+    preprocess_config: Optional[TweetPreprocessConfig] = None,
+    skip_stances: Optional[list[Stance]] = None,
+    cfact_path: Optional[str] = None,
+):
+    problems = load_problems(problem_path, preprocess_config)
+    for post, frame, stance in iterate_post_frame_labeled_pairs(
+        data_path, frame_path, preprocess_config=preprocess_config, skip_stances=skip_stances, cfact_path=cfact_path
+    ):
+        if frame.problems is not None and len(frame.problems) > 0:
+            for p_id in frame.problems:
+                problem = problems[p_id]
+                yield post, frame, stance, problem
 
 
 def iterate_post_frame_unlabeled_pairs(
