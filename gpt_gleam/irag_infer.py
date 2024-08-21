@@ -39,8 +39,6 @@ def main(
             ex_id = f"{post.id}"
             if ex_id in preds:
                 continue
-            if not any(s == Stance.Accept for s in post.labels.values()):
-                continue
             messages = creator.create_context(post, demos=post.demonstrations)
             completion = chat(
                 client,
