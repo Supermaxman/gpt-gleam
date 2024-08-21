@@ -8,7 +8,15 @@ from tqdm import tqdm
 from gpt_gleam.chat import ChatContextCreator, chat, print_messages
 from gpt_gleam.configuration import ChatCompletionConfig
 
-from gpt_gleam.data import Stance, TweetPreprocessConfig, iterate_posts, load_frames, load_problems, preprocess_tweet
+from gpt_gleam.data import (
+    Frame,
+    Stance,
+    TweetPreprocessConfig,
+    iterate_posts,
+    load_frames,
+    load_problems,
+    preprocess_tweet,
+)
 from gpt_gleam.predictions import JsonlPredictionsWriter
 from gpt_gleam.progress import ChatCompletionProgress
 
@@ -21,6 +29,7 @@ def main(
     output_path: str,
     total: Optional[int] = None,
     debug: bool = False,
+    keep_known: bool = False,
 ):
     preprocess_config = TweetPreprocessConfig(
         do_lower_case=False,
@@ -47,6 +56,7 @@ def main(
         timeout=os.getenv("OPENAI_TIMEOUT", 90),
     )
     total = len(new_frames)
+    next_frame_id = max(int(k[1:]) for k in known_frames.keys()) + 1 if known_frames else 1
 
     with (
         JsonlPredictionsWriter(output_path) as preds,
@@ -96,6 +106,25 @@ def main(
             messages.append({"role": "assistant", "content": content})
             if debug:
                 print_messages(messages)
+            p = json.loads(content)
+            known_frame_id = p["frame_id"]
+            if known_frame_id is None and keep_known:
+                problems = []
+                for problem, problem_data in sorted(
+                    new_frame["problems"].items(), key=lambda x: x[1]["count"], reverse=True
+                ):
+                    fp_count = problem_data["count"]
+                    fp_percent = fp_count / total_count
+                    # must be a problem if it's more than 50% of the time
+                    if fp_percent > 0.5:
+                        problems.append(problem)
+                known_frames[f"F{next_frame_id}"] = Frame(
+                    id=f"F{next_frame_id}",
+                    text=f_text,
+                    problems=problems,
+                )
+                next_frame_id += 1
+
             bar.update(completion)
 
 
@@ -108,6 +137,7 @@ if __name__ == "__main__":
     parser.add_argument("--output_path", type=str, required=True, help="path to output jsonl file")
     parser.add_argument("--total", type=int, help="total number of examples to process")
     parser.add_argument("--debug", action="store_true", help="debug mode")
+    parser.add_argument("--keep_known", action="store_true", help="keep known frames", default=False)
     args = parser.parse_args()
 
     with open(args.config, "r") as f:
@@ -122,4 +152,5 @@ if __name__ == "__main__":
         output_path=args.output_path,
         total=args.total,
         debug=args.debug,
+        keep_known=args.keep_known,
     )
