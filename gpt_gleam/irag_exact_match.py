@@ -75,7 +75,6 @@ def main(
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()
-    parser.add_argument("--config", type=str, required=True, help="path to config file")
     parser.add_argument("--pred_path", type=str, required=True, help="path to data jsonl file")
     parser.add_argument("--output_path", type=str, required=True, help="path to output jsonl file")
     args = parser.parse_args()
