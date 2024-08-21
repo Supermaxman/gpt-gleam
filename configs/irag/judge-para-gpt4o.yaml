@@ -8,7 +8,7 @@ top_p: 0.4
 response_format:
   type: "json_schema"
   json_schema:
-    name: irag_demos
+    name: irag_judge_para
     schema:
       type: object
       properties:
