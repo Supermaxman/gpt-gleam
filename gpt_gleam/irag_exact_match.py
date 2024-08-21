@@ -5,8 +5,7 @@ import ujson as json
 from gpt_gleam.data import read_jsonl
 
 
-def key_fn(frame):
-    frame_text = frame["frame"]
+def key_fn(frame_text):
     frame_text = frame_text.replace(" ", "")
     frame_text = frame_text.replace("\n", "")
     frame_text = frame_text.replace("\t", "")
@@ -35,7 +34,7 @@ def main(
         pred_frames = json.loads(pred["content"])
         for frame in pred_frames["frames"]:
             count += 1
-            f_key = key_fn(frame)
+            f_key = key_fn(frame["frame"])
             if f_key not in unique_frames:
                 known_f_id = known_lookup.get(f_key)
                 unique_frames[f_key] = {
