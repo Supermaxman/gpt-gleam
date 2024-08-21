@@ -89,15 +89,15 @@ class ChatContextCreator:
 
     def build_prompt(
         self,
-        post: Post,
+        post: Optional[Post] = None,
         frame: Optional[Frame] = None,
         stance: Optional[Stance] = None,
         problems: Optional[dict[str, Problem]] = None,
         **kwargs,
     ) -> str:
-        values = {
-            "post": post.text,
-        }
+        values = {}
+        if post is not None:
+            values["post"] = post.text
         if frame is not None:
             values["frame"] = frame.text
 
@@ -114,21 +114,21 @@ class ChatContextCreator:
 
     def create_prompt(
         self,
-        post: Post,
+        post: Optional[Post] = None,
         frame: Optional[Frame] = None,
         stance: Optional[Stance] = None,
         problems: Optional[dict[str, Problem]] = None,
         **kwargs,
     ):
         content = self.build_prompt(post, frame, stance, problems, **kwargs)
-        if post.image_url is None:
-            return self.create_text_prompt(content)
-        else:
+        if post is not None and post.image_url is not None:
             return self.create_image_prompt(content, post.image_url)
+        else:
+            return self.create_text_prompt(content)
 
     def create_context(
         self,
-        post: Post,
+        post: Optional[Post] = None,
         frame: Optional[Frame] = None,
         stance: Optional[Stance] = None,
         problems: Optional[dict[str, Problem]] = None,
