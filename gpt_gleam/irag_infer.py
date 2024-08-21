@@ -20,6 +20,7 @@ def main(
     output_path: str,
     total: Optional[int] = None,
     debug: bool = False,
+    rag_top_k: Optional[int] = None,
 ):
     creator = ChatContextCreator(config)
     client = OpenAI(
@@ -39,7 +40,12 @@ def main(
             ex_id = f"{post.id}"
             if ex_id in preds:
                 continue
-            messages = creator.create_context(post, demos=post.demonstrations)
+            demos = post.demonstrations
+            if rag_top_k is not None and demos is not None and len(demos) > rag_top_k:
+                # best examples are at the end
+                # demos = demos[:rag_top_k]
+                demos = demos[-rag_top_k:]
+            messages = creator.create_context(post, demos=demos)
             completion = chat(
                 client,
                 delay=config.delay,
@@ -69,6 +75,7 @@ if __name__ == "__main__":
     parser.add_argument("--demo_data_path", type=str, required=True, help="path to demo data jsonl file")
     parser.add_argument("--output_path", type=str, required=True, help="path to output jsonl file")
     parser.add_argument("--total", type=int, help="total number of examples to process")
+    parser.add_argument("--rag_top_k", type=int, default=None, help="top k examples to process")
     parser.add_argument("--debug", action="store_true", help="debug mode")
     args = parser.parse_args()
 
@@ -83,4 +90,5 @@ if __name__ == "__main__":
         output_path=args.output_path,
         total=args.total,
         debug=args.debug,
+        rag_top_k=args.rag_top_k,
     )
