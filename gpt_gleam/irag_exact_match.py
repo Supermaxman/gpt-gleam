@@ -27,7 +27,7 @@ def main(
     for pred in read_jsonl(pred_path):
         post_count += 1
         pred_frames = json.loads(pred["content"])
-        for frame in pred_frames:
+        for frame in pred_frames["frames"]:
             count += 1
             f_key = key_fn(frame)
             if f_key not in unique_frames:
