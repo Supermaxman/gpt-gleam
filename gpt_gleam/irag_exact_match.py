@@ -22,9 +22,13 @@ def main(
     output_path: str,
 ):
     unique_frames = {}
+    post_count = 0
+    count = 0
     for pred in read_jsonl(pred_path):
+        post_count += 1
         pred_frames = json.loads(pred["content"])
         for frame in pred_frames:
+            count += 1
             f_key = key_fn(frame)
             if f_key not in unique_frames:
                 unique_frames[f_key] = {
@@ -54,13 +58,15 @@ def main(
                             else:
                                 unique_frames[f_key]["problems"][p["problem"]]["locations"][l["location"]] += 1
 
+    print(f"Posts: {post_count:,}")
+    print(f"Frames: {count:,}")
     frames = {
         f"F{i}": frame
         for i, (_, frame) in enumerate(
             sorted(unique_frames.items(), key=lambda x: x[1]["count"], reverse=True), start=1
         )
     }
-    print(f"Frames: {len(frames):,}")
+    print(f"Unique Frames: {len(frames):,}")
     with open(output_path, "w") as f:
         json.dump(frames, f, indent=2)
 
