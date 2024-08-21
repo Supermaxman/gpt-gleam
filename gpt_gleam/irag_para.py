@@ -37,25 +37,9 @@ def main(
     problems_text = "\n".join([f"{k}: {v.claim}" for k, v in problems.items()])
     known_frames = load_frames(known_path, preprocess_config)
     with open(pred_path, "r") as f:
-        # "F4": {
-        # "frame": "COVID-19 vaccine is an unsafe poison, no one should take it.",
-        # "problems": {
-        # "Conspiracy": {
-        #     "locations": {
-        #     "Text": 21,
-        #     "Image": 19
-        #     },
-        #     "count": 21
-        # },
-        # "Confidence": {
-        #     "locations": {
-        #     "Text": 15,
-        #     "Image": 11
-        #     },
-        #     "count": 15
-        # }
-        # },
-        new_frames = json.load(f)
+        all_new_frames = json.load(f)
+
+    new_frames = {f_key: f_data for f_key, f_data in all_new_frames.items() if f_data["known_id"] is None}
 
     creator = ChatContextCreator(config)
     client = OpenAI(
