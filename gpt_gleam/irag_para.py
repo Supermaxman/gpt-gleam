@@ -106,7 +106,11 @@ def main(
             messages.append({"role": "assistant", "content": content})
             if debug:
                 print_messages(messages)
-            p = json.loads(content)
+            try:
+                p = json.loads(content)
+            except json.JSONDecodeError:
+                print(f"Failed to parse completion for {new_frame_id}")
+                continue
             known_frame_id = p["frame_id"]
             if known_frame_id is None and keep_known:
                 problems = []
