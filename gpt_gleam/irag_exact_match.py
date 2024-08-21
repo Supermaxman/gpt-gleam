@@ -19,8 +19,14 @@ def key_fn(frame):
 
 def main(
     pred_path: str,
+    known_path: str,
     output_path: str,
 ):
+    known_lookup = {}
+    with open(known_path, "r") as f:
+        known_frames = json.load(f)
+    for f_id, f in known_frames.items():
+        known_lookup[key_fn(f["text"])] = f_id
     unique_frames = {}
     post_count = 0
     count = 0
@@ -31,6 +37,7 @@ def main(
             count += 1
             f_key = key_fn(frame)
             if f_key not in unique_frames:
+                known_f_id = known_lookup.get(f_key)
                 unique_frames[f_key] = {
                     "frame": frame["frame"],
                     "problems": {
@@ -41,6 +48,7 @@ def main(
                         for p in frame["problems"]
                     },
                     "count": 1,
+                    "known_id": known_f_id,
                 }
             else:
                 unique_frames[f_key]["count"] += 1
@@ -76,10 +84,12 @@ def main(
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()
     parser.add_argument("--pred_path", type=str, required=True, help="path to data jsonl file")
+    parser.add_argument("--known_path", type=str, required=True, help="path to known json file")
     parser.add_argument("--output_path", type=str, required=True, help="path to output jsonl file")
     args = parser.parse_args()
 
     main(
         pred_path=args.pred_path,
+        known_path=args.known_path,
         output_path=args.output_path,
     )
