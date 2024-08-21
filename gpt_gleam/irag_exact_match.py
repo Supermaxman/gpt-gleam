@@ -29,6 +29,7 @@ def main(
     unique_frames = {}
     post_count = 0
     count = 0
+    known = 0
     for pred in read_jsonl(pred_path):
         post_count += 1
         pred_frames = json.loads(pred["content"])
@@ -37,6 +38,8 @@ def main(
             f_key = key_fn(frame["frame"])
             if f_key not in unique_frames:
                 known_f_id = known_lookup.get(f_key)
+                if known_f_id is not None:
+                    known += 1
                 unique_frames[f_key] = {
                     "frame": frame["frame"],
                     "problems": {
@@ -67,6 +70,7 @@ def main(
 
     print(f"Posts: {post_count:,}")
     print(f"Frames: {count:,}")
+    print(f"Known Frames: {known:,}")
     frames = {
         f"F{i}": frame
         for i, (_, frame) in enumerate(
