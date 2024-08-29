@@ -16,6 +16,37 @@ def key_fn(frame_text):
     return frame_text
 
 
+# Example usage:
+# {"id":"1475392788443316224","post_id":"1475392788443316224","content":"{\"frames\":[{\"problems\":[{\"explanation\":\"The post highlights that the protection from the Oxford-AstraZeneca COVID-19 vaccine wanes after three months, which can undermine confidence in its long-term efficacy. This information may lead to concerns about the vaccine's ability to provide sustained protection, affecting public trust.\",\"locations\":[{\"explanation\":\"The text explicitly states that the vaccine's protection wanes after three months, directly addressing concerns about its long-term efficacy.\",\"location\":\"Text\"}],\"problem\":\"Confidence\"},{\"explanation\":\"The information about the waning protection of the Oxford-AstraZeneca vaccine suggests a need for individuals to calculate the timing of booster shots or consider alternative vaccines. This requires weighing the benefits and drawbacks of continuing with this vaccine versus switching to another option.\",\"locations\":[{\"explanation\":\"The text implies a need for further action or consideration regarding booster shots or alternative vaccines due to waning protection.\",\"location\":\"Text\"}],\"problem\":\"Calculation\"}],\"frame_rationale\":\"The frame of communication is evoked by addressing both confidence and calculation problems. The post raises concerns about the long-term efficacy of the Oxford-AstraZeneca vaccine, potentially undermining confidence in its ability to provide sustained protection. Additionally, it suggests a need for individuals to calculate the timing of booster shots or consider alternative vaccines, requiring a thoughtful evaluation of options. Together, these elements highlight the importance of considering both the reliability and strategic use of the vaccine.\",\"frame\":\"The COVID-19 vaccine requires multiple doses to be effective.\"}]}"}
+
+
+def add_pred_locations(locations: list[dict[str, str]]):
+    new_locations = []
+    seen_text = False
+    seen_image = False
+    for location in locations:
+        location = location["location"]
+        if location == "Text" and seen_text:
+            continue
+        if location == "Image" and seen_image:
+            continue
+        if location == "Text":
+            seen_text = True
+        elif location == "Image":
+            seen_image = True
+        else:
+            continue
+        new_location = {"location": location}
+        new_locations.append(new_location)
+    if seen_text and seen_image:
+        new_locations.append({"location": "Both"})
+    elif seen_text:
+        new_locations.append({"location": "Text-Only"})
+    elif seen_image:
+        new_locations.append({"location": "Image-Only"})
+    return new_locations
+
+
 def main(
     pred_path: str,
     known_path: str,
@@ -33,40 +64,43 @@ def main(
     for pred in read_jsonl(pred_path):
         post_count += 1
         pred_frames = json.loads(pred["content"])
-        for frame in pred_frames["frames"]:
+        for f_pred in pred_frames["frames"]:
+            post_id = pred["post_id"]
             count += 1
-            f_key = key_fn(frame["frame"])
+            f_key = key_fn(f_pred["frame"])
             if f_key not in unique_frames:
                 known_f_id = known_lookup.get(f_key)
                 if known_f_id is not None:
                     known += 1
                 unique_frames[f_key] = {
-                    "frame": frame["frame"],
+                    "frame": f_pred["frame"],
                     "problems": {
                         p["problem"]: {
-                            "locations": {l["location"]: 1 for l in p["locations"]},
-                            "count": 1,
+                            "locations": {l["location"]: [post_id] for l in add_pred_locations(p["locations"])},
+                            "posts": [post_id],
                         }
-                        for p in frame["problems"]
+                        for p in f_pred["problems"]
                     },
-                    "count": 1,
+                    "posts": [post_id],
                     "known_id": known_f_id,
                 }
             else:
-                unique_frames[f_key]["count"] += 1
-                for p in frame["problems"]:
+                unique_frames[f_key]["posts"].append(post_id)
+                for p in f_pred["problems"]:
                     if p["problem"] not in unique_frames[f_key]["problems"]:
                         unique_frames[f_key]["problems"][p["problem"]] = {
-                            "locations": {l["location"]: 1 for l in p["locations"]},
-                            "count": 1,
+                            "locations": {l["location"]: [post_id] for l in add_pred_locations(p["locations"])},
+                            "posts": [post_id],
                         }
                     else:
-                        unique_frames[f_key]["problems"][p["problem"]]["count"] += 1
-                        for l in p["locations"]:
+                        unique_frames[f_key]["problems"][p["problem"]]["posts"].append(post_id)
+                        for l in add_pred_locations(p["locations"]):
                             if l["location"] not in unique_frames[f_key]["problems"][p["problem"]]["locations"]:
-                                unique_frames[f_key]["problems"][p["problem"]]["locations"][l["location"]] = 1
+                                unique_frames[f_key]["problems"][p["problem"]]["locations"][l["location"]] = [post_id]
                             else:
-                                unique_frames[f_key]["problems"][p["problem"]]["locations"][l["location"]] += 1
+                                unique_frames[f_key]["problems"][p["problem"]]["locations"][l["location"]].append(
+                                    post_id
+                                )
 
     print(f"Posts: {post_count:,}")
     print(f"Frames: {count:,}")
@@ -74,7 +108,7 @@ def main(
     frames = {
         f"F{i}": frame
         for i, (_, frame) in enumerate(
-            sorted(unique_frames.items(), key=lambda x: x[1]["count"], reverse=True), start=1
+            sorted(unique_frames.items(), key=lambda x: len(x[1]["posts"]), reverse=True), start=1
         )
     }
     print(f"Unique Frames: {len(frames):,}")
