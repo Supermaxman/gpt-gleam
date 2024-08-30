@@ -16,10 +16,6 @@ def key_fn(frame_text):
     return frame_text
 
 
-# Example usage:
-# {"id":"1475392788443316224","post_id":"1475392788443316224","content":"{\"frames\":[{\"problems\":[{\"explanation\":\"The post highlights that the protection from the Oxford-AstraZeneca COVID-19 vaccine wanes after three months, which can undermine confidence in its long-term efficacy. This information may lead to concerns about the vaccine's ability to provide sustained protection, affecting public trust.\",\"locations\":[{\"explanation\":\"The text explicitly states that the vaccine's protection wanes after three months, directly addressing concerns about its long-term efficacy.\",\"location\":\"Text\"}],\"problem\":\"Confidence\"},{\"explanation\":\"The information about the waning protection of the Oxford-AstraZeneca vaccine suggests a need for individuals to calculate the timing of booster shots or consider alternative vaccines. This requires weighing the benefits and drawbacks of continuing with this vaccine versus switching to another option.\",\"locations\":[{\"explanation\":\"The text implies a need for further action or consideration regarding booster shots or alternative vaccines due to waning protection.\",\"location\":\"Text\"}],\"problem\":\"Calculation\"}],\"frame_rationale\":\"The frame of communication is evoked by addressing both confidence and calculation problems. The post raises concerns about the long-term efficacy of the Oxford-AstraZeneca vaccine, potentially undermining confidence in its ability to provide sustained protection. Additionally, it suggests a need for individuals to calculate the timing of booster shots or consider alternative vaccines, requiring a thoughtful evaluation of options. Together, these elements highlight the importance of considering both the reliability and strategic use of the vaccine.\",\"frame\":\"The COVID-19 vaccine requires multiple doses to be effective.\"}]}"}
-
-
 def add_pred_locations(locations: list[dict[str, str]]):
     new_locations = []
     seen_text = False
