@@ -68,11 +68,11 @@ def main(
                 continue
             f_text = preprocess_tweet(new_frame["frame"], preprocess_config)
             f_problems = []
-            total_count = new_frame["count"]
+            total_count = len(new_frame["posts"])
             for problem, problem_data in sorted(
-                new_frame["problems"].items(), key=lambda x: x[1]["count"], reverse=True
+                new_frame["problems"].items(), key=lambda x: len(x[1]["posts"]), reverse=True
             ):
-                fp_count = problem_data["count"]
+                fp_count = len(problem_data["posts"])
                 f_problems.append(f"{problem}: {100 * fp_count / total_count:.0f}%")
             f_problems_text = "\n".join(f_problems)
             known_frame_texts = []
@@ -115,9 +115,9 @@ def main(
             if known_frame_id is None and keep_known:
                 problems = []
                 for problem, problem_data in sorted(
-                    new_frame["problems"].items(), key=lambda x: x[1]["count"], reverse=True
+                    new_frame["problems"].items(), key=lambda x: len(x[1]["posts"]), reverse=True
                 ):
-                    fp_count = problem_data["count"]
+                    fp_count = len(problem_data["posts"])
                     fp_percent = fp_count / total_count
                     # must be a problem if it's more than 50% of the time
                     if fp_percent > 0.5:
