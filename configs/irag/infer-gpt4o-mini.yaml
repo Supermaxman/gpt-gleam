@@ -1,0 +1,88 @@
+seed: 0
+# could go lower, but 1 second per request to avoid spamming
+delay: 1
+model: gpt-4o-mini
+max_tokens: 2048
+temperature: 1.0
+top_p: 0.4
+response_format:
+  type: "json_schema"
+  json_schema:
+    name: irag_frames
+    schema:
+      type: object
+      properties:
+        frames:
+          type: array
+          items:
+            type: object
+            properties:
+              problems:
+                type: array
+                items:
+                  type: object
+                  properties:
+                    explanation:
+                      description: Explain why a problem is addressed through a cause articulated in the post. Make sure to explain how the image and text together contribute to addressing the problem.
+                      type: string
+                    locations:
+                      description: The locations in the post where this problem addressed.
+                      type: array
+                      items:
+                        type: object
+                        properties:
+                          explanation:
+                            description: Explain why this problem is addressed by this location in the post.
+                            type: string
+                          location:
+                            description: The location in the post where this problem is addressed.
+                            type: string
+                            enum:
+                              - "Text"
+                              - "Image"
+                        required:
+                          - explanation
+                          - location
+                        additionalProperties: false
+                    problem:
+                      description: The name of the frame problem addressed by the post. The problem must have a cause articulated in the post, and must be addressed by the discovered frame of communication.
+                      type: string
+                      enum:
+                        - "Confidence"
+                        - "Complacency"
+                        - "Constraints"
+                        - "Calculation"
+                        - "Collective Responsibility"
+                        - "Compliance"
+                        - "Conspiracy"
+                  required:
+                    - explanation
+                    - locations
+                    - problem
+                  additionalProperties: false
+              frame_rationale:
+                description: Explain why a frame of communication is evoked by this post, drawing upon each addressed problem.
+                type: string
+              frame:
+                description: Articulate the evoked frame of communication.
+                type: string
+            required:
+              - problems
+              - frame_rationale
+              - frame
+            additionalProperties: false
+      required:
+        - frames
+      additionalProperties: false
+    strict: true
+
+system_prompt: >-
+  You are an expert linguistic assistant.
+  Frames of communication select particular aspects of an issue and make them salient in communicating a message.
+  Salient aspects are referred to as problems, which are addressed through articulated causes when authors communicate via framing.
+  Frames of communication are ubiquitous in social media discourse and can impact how people understand issues and, more importantly, how they form their opinions.
+  You will be tasked with identifying the problems a social media post addresses, as well as articulating evoked frames of communication by articulating the causes provided for the addressed problems.
+  You should discuss your reasoning in detail, thinking step-by-step.
+user_prompt: |-
+  Post:
+  {post}

@@ -1,0 +1,75 @@
+seed: 0
+# could go lower, but 1 second per request to avoid spamming
+delay: 1
+model: gpt-4o-mini
+max_tokens: 1024
+temperature: 1.0
+top_p: 0.4
+response_format:
+  type: "json_schema"
+  json_schema:
+    name: irag_judge_para
+    schema:
+      type: object
+      properties:
+        shared_problems:
+          type: array
+          items:
+            type: object
+            properties:
+              explanation:
+                description: Explain why this problem is addressed by both paraphrasing frames of communication (if any).
+                type: string
+              problem:
+                description: The name of the frame problem addressed by both paraphrasing frames of communication (if any).
+                type: string
+                enum:
+                  - "Confidence"
+                  - "Complacency"
+                  - "Constraints"
+                  - "Calculation"
+                  - "Collective Responsibility"
+                  - "Compliance"
+                  - "Conspiracy"
+            required:
+              - explanation
+              - problem
+            additionalProperties: false
+        paraphrase_rationale:
+          description: Explain why the novel frame of communication paraphrases any of the known frames of communication, drawing upon each addressed problem, or why the novel frame of communication is new.
+          type: string
+        frame_id:
+          description: The frame ID of the corresponding known frame of communication, which the novel frame of communication paraphrases (if any).
+          type: 
+            - "string"
+            - "null"
+      required:
+        - shared_problems
+        - paraphrase_rationale
+        - frame_id
+      additionalProperties: false
+    strict: true
+  
+system_prompt: >-
+  You are an expert linguistic assistant.
+  Frames of communication select particular aspects of an issue and make them salient in communicating a message.
+  Salient aspects are referred to as problems, which are addressed through articulated causes when authors communicate via framing.
+  Frames of communication are ubiquitous in social media discourse and can impact how people understand issues and, more importantly, how they form their opinions.
+  You will be tasked with judging if a new frame of communication is novel or a paraphrase of a known frame of communication.
+  First, you should identify any overlap with addressed problems. Exact overlap is not necessary, but there likely should be some overlap in the addressed problems of paraphrasing frames of communication.
+  The novel frames of communication will have the addressed problems listed, along with how often those problems were addressed by social media posts evoking the novel frame of communication.
+  Next, you should ensure paraphrasing frames of communication share the same causes for the addressed problems they share.
+  Finally, you should determine which known frame of communication, if any, is a paraphrase of the provided novel frame of communication. You will identify the paraphrasing frame of communication by providing the frame ID.
+  You should discuss your reasoning in detail, thinking step-by-step.
+user_prompt: |-
+  Problem Definitions:
+  {problem_definitions}
+
+  Known Frames of Communication:
+  {known_frames}
+
+  Novel Frame of Communication: 
+  {novel_frame}
+
+  Problems Addressed by Frame of Communication:
+  {novel_problems}
